@@ -24,7 +24,7 @@ export async function POST(req: Request) {
             model: GEMINI_MODEL,
             generationConfig: {
                 responseMimeType: "application/json",
-                responseSchema: schema,
+                responseSchema: schema as any,
             },
         });
 
