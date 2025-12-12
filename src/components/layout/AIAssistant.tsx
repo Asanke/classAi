@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -13,22 +14,34 @@ export function AIAssistant() {
     ]);
     const [input, setInput] = useState("");
 
-    const handleSend = () => {
-        if (!input.trim()) return;
-        setMessages([...messages, { role: 'user', text: input }]);
-        setInput("");
+    const { role } = useAuth();
+    const [isThinking, setIsThinking] = useState(false);
 
-        // Mock AI Response
-        setTimeout(() => {
-            const responses = [
-                "I can help with that! Let's navigate to the Classes section.",
-                "To set up a quiz, go to the Teacher Dashboard inside the Subject view.",
-                "Seat utilization is currently at 78%. We might need another hall for O/L Maths.",
-                "Generating a lesson plan for 'Newton's Laws'... Done! Check your Documents."
-            ];
-            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-            setMessages(prev => [...prev, { role: 'ai', text: randomResponse }]);
-        }, 1000);
+    const handleSend = async () => {
+        if (!input.trim()) return;
+
+        const userMessage = { role: 'user' as const, text: input };
+        const newMessages = [...messages, userMessage];
+
+        setMessages(newMessages);
+        setInput("");
+        setIsThinking(true);
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: newMessages, role })
+            });
+
+            const data = await response.json();
+            setMessages(prev => [...prev, { role: 'ai', text: data.text }]);
+        } catch (error) {
+            console.error("Chat Error:", error);
+            setMessages(prev => [...prev, { role: 'ai', text: "Sorry, I'm having trouble connecting right now." }]);
+        } finally {
+            setIsThinking(false);
+        }
     };
 
     return (
@@ -57,13 +70,21 @@ export function AIAssistant() {
                         {messages.map((msg, i) => (
                             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${msg.role === 'user'
-                                        ? 'bg-b2u-blue text-white rounded-tr-none'
-                                        : 'bg-white/10 backdrop-blur-md border border-white/10 text-foreground rounded-tl-none'
+                                    ? 'bg-b2u-blue text-white rounded-tr-none'
+                                    : 'bg-white/10 backdrop-blur-md border border-white/10 text-foreground rounded-tl-none'
                                     }`}>
                                     {msg.text}
                                 </div>
                             </div>
                         ))}
+                        {isThinking && (
+                            <div className="flex justify-start">
+                                <div className="bg-white/10 backdrop-blur-md border border-white/10 text-foreground rounded-2xl rounded-tl-none px-4 py-2 text-sm flex items-center gap-2">
+                                    <Sparkles className="h-3 w-3 animate-spin text-b2u-cyan" />
+                                    <span className="text-xs opacity-70">Thinking...</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="p-3 border-t border-white/10 bg-black/5">
