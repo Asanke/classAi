@@ -1,0 +1,18 @@
+﻿github.com
+  Γ£ô Logged in to github.com account LuxusEle (keyring)
+  - Active account: true
+  - Git operations protocol: https
+  - Token: gho_************************************
+  - Token scopes: 'gist', 'read:org', 'repo', 'workflow'
+
+  Γ£ô Logged in to github.com account Asanke (keyring)
+  - Active account: false
+  - Git operations protocol: https
+  - Token: gho_************************************
+  - Token scopes: 'admin:public_key', 'delete_repo', 'gist', 'read:org', 'repo'
+
+  Γ£ô Logged in to github.com account admib2uapp-ui (keyring)
+  - Active account: false
+  - Git operations protocol: https
+  - Token: gho_************************************
+  - Token scopes: 'gist', 'read:org', 'repo', 'workflow'

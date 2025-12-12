@@ -98,7 +98,6 @@ export function AddStudentForm({ onSuccess }: AddStudentFormProps) {
                     <Label htmlFor="parentPhone">Phone Number</Label>
                     <Input
                         id="parentPhone"
-                        selected
                         type="tel"
                         value={formData.parentPhone}
                         onChange={(e) => setFormData({ ...formData, parentPhone: e.target.value })}
