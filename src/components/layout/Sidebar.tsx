@@ -13,7 +13,8 @@ import {
     FileText,
     GraduationCap,
     HelpCircle,
-    LogOut
+    LogOut,
+    UploadCloud
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -47,6 +48,7 @@ export function Sidebar() {
         { name: "My Subjects", href: "/student-portal/subjects", icon: BookOpen },
         { name: "Lesson History", href: "/student-portal/history", icon: FileText },
         { name: "Quizzes", href: "/student-portal/quizzes", icon: HelpCircle },
+        { name: "Uploads", href: "/student-portal/uploads", icon: UploadCloud },
     ];
 
     // Select menu based on role
