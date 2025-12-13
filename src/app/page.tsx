@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { GraduationCap, BookOpen, Users, ShieldCheck, ArrowRight } from "lucide-react";
 import { useAuth, Role } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { PlexusBackground } from "@/components/ui/plexus-background";
+import { FluidBackground } from "@/components/ui/fluid-background";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { motion } from "framer-motion";
+import { RotatingBenefits } from "@/components/landing/rotating-benefits";
 
 export default function PortalPage() {
   const { switchRole } = useAuth();
@@ -37,7 +38,7 @@ export default function PortalPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background relative overflow-hidden transition-colors duration-500">
-      <PlexusBackground />
+      <FluidBackground />
 
       {/* Background Gradients (Subtle) */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
@@ -90,6 +91,10 @@ export default function PortalPage() {
               Experience the future of education management with
               <span className="font-semibold text-foreground"> AI-powered insights</span>.
             </motion.p>
+
+            <motion.div variants={fadeInUp}>
+              <RotatingBenefits />
+            </motion.div>
 
             <motion.div variants={fadeInUp} className="flex gap-4 pt-4">
               <Button variant="animated" size="lg" className="rounded-full px-8 h-12 text-lg shadow-lg hover:shadow-cyan-500/20">
