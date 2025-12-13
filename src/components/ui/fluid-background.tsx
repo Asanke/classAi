@@ -19,7 +19,6 @@ export function FluidBackground() {
                 curl: 30,
                 splatRadius: 0.4,
                 fluidColor: [50 / 255, 150 / 255, 255 / 255], // RGB values normalized to 0-1
-                backgroundColor: [0, 0, 0, 0], // Transparent background
                 transparent: true,
                 bloom: true,
                 bloomIntensity: 0.5,
