@@ -1,0 +1,83 @@
+import { NextResponse } from "next/server";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { GOOGLE_API_KEY, GEMINI_MODEL } from "@/lib/gemini-config";
+
+const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+
+const schema = {
+    description: "Lesson Plan schema",
+    type: SchemaType.OBJECT,
+    properties: {
+        topic: { type: SchemaType.STRING },
+        grade: { type: SchemaType.STRING },
+        learningOutcomes: {
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING }
+        },
+        sections: {
+            type: SchemaType.ARRAY,
+            items: {
+                type: SchemaType.OBJECT,
+                properties: {
+                    title: { type: SchemaType.STRING },
+                    duration: { type: SchemaType.STRING },
+                    content: {
+                        type: SchemaType.ARRAY,
+                        items: { type: SchemaType.STRING }
+                    },
+                    activity: { type: SchemaType.STRING },
+                    visualAid: {
+                        type: SchemaType.OBJECT,
+                        properties: {
+                            type: { type: SchemaType.STRING, enum: ["image", "diagram", "chart"] },
+                            description: { type: SchemaType.STRING, description: "Detailed prompt for generating this image" },
+                            caption: { type: SchemaType.STRING }
+                        },
+                        nullable: true
+                    }
+                },
+                required: ["title", "duration", "content"]
+            }
+        },
+        homework: { type: SchemaType.STRING }
+    },
+    required: ["topic", "grade", "learningOutcomes", "sections", "homework"]
+};
+
+export async function POST(req: Request) {
+    try {
+        const { topic, grade, requirements } = await req.json();
+
+        const model = genAI.getGenerativeModel({
+            model: GEMINI_MODEL,
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: schema as any,
+            },
+        });
+
+        let prompt = `
+      Create a comprehensive lesson plan for Grade ${grade} students about "${topic}".
+      
+      Structure the lesson into logical sections (Introduction, Core Instruction, Practice, Review).
+      For each section, suggest a "Visual Aid" if appropriate. This description will be used to generate an image later, so be descriptive.
+    `;
+
+        if (requirements) {
+            prompt += `\nAdditional Requirements: ${requirements}`;
+        }
+
+        const result = await model.generateContent(prompt);
+        const text = result.response.text();
+        const lessonPlan = JSON.parse(text);
+
+        return NextResponse.json(lessonPlan);
+
+    } catch (error) {
+        console.error("Lesson Plan Generation Error:", error);
+        return NextResponse.json(
+            { error: "Failed to generate lesson plan" },
+            { status: 500 }
+        );
+    }
+}

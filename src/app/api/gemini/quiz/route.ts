@@ -33,7 +33,7 @@ const schema = {
 
 export async function POST(req: Request) {
     try {
-        const { topic, difficulty } = await req.json();
+        const { topic, difficulty, learningOutcomes } = await req.json();
 
         const model = genAI.getGenerativeModel({
             model: GEMINI_MODEL,
@@ -43,11 +43,22 @@ export async function POST(req: Request) {
             },
         });
 
-        const prompt = `
+        let prompt = `
       Create a ${difficulty} difficulty quiz about "${topic}".
       Generate 3 multiple choice questions.
-      Ensure the questions test key learning outcomes related to ${topic}.
     `;
+
+        if (learningOutcomes) {
+            prompt += `
+      The questions MUST specifically test these intended learning outcomes:
+      "${learningOutcomes}"
+      Ensure the questions directly assess whether a student has achieved these outcomes.
+      `;
+        } else {
+            prompt += `
+      Ensure the questions test key learning outcomes related to ${topic}.
+      `;
+        }
 
         const result = await model.generateContent(prompt);
         const quizData = result.response.text();

@@ -10,11 +10,13 @@ import Link from "next/link";
 import { generateAIQuiz, Quiz } from "@/lib/ai-generator";
 import { useRouter } from "next/navigation";
 import { addDocument } from "@/lib/firestore";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function QuizGeneratorPage() {
     const router = useRouter();
     const [topic, setTopic] = useState("");
     const [difficulty, setDifficulty] = useState("Medium");
+    const [learningOutcomes, setLearningOutcomes] = useState("");
     const [isGenerating, setIsGenerating] = useState(false);
     const [quiz, setQuiz] = useState<Quiz | null>(null);
 
@@ -22,7 +24,7 @@ export default function QuizGeneratorPage() {
         if (!topic) return;
         setIsGenerating(true);
         try {
-            const generatedQuiz = await generateAIQuiz(topic, difficulty);
+            const generatedQuiz = await generateAIQuiz(topic, difficulty, learningOutcomes);
             setQuiz(generatedQuiz);
         } catch (error) {
             console.error("Failed to generate quiz", error);
@@ -84,6 +86,20 @@ export default function QuizGeneratorPage() {
                         </Select>
                     </div>
                 </div>
+
+                <div className="mt-6 space-y-2">
+                    <label className="text-sm font-medium">Learning Outcomes (Optional)</label>
+                    <Textarea
+                        placeholder="e.g. Students should be able to define X and apply Y..."
+                        value={learningOutcomes}
+                        onChange={(e) => setLearningOutcomes(e.target.value)}
+                        className="min-h-[100px]"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                        The AI will prioritize questions that test these specific outcomes.
+                    </p>
+                </div>
+
                 <div className="mt-6 flex justify-end">
                     <Button
                         onClick={handleGenerate}
