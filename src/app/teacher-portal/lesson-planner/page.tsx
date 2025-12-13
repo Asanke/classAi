@@ -19,11 +19,13 @@ export default function LessonPlanner() {
     const generatePlan = async () => {
         if (!topic || !grade) return;
         setLoading(true);
+        setPlan(null); // Clear previous plan
         try {
             const generatedPlan = await generateAILessonPlan(topic, grade, requirements);
             setPlan(generatedPlan);
         } catch (error) {
             console.error("Failed to generate plan", error);
+            alert("Failed to generate lesson plan. The AI might be busy or the response was invalid. Please try again.");
         } finally {
             setLoading(false);
         }

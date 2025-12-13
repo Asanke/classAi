@@ -52,7 +52,7 @@ export async function POST(req: Request) {
             model: GEMINI_MODEL,
             generationConfig: {
                 responseMimeType: "application/json",
-                responseSchema: schema as any,
+                // responseSchema: schema as any, // Schema validation can sometimes be too strict or fail with markdown
             },
         });
 
@@ -61,6 +61,27 @@ export async function POST(req: Request) {
       
       Structure the lesson into logical sections (Introduction, Core Instruction, Practice, Review).
       For each section, suggest a "Visual Aid" if appropriate. This description will be used to generate an image later, so be descriptive.
+
+      Return the response as a single valid JSON object with this structure:
+      {
+        "topic": "string",
+        "grade": "string",
+        "learningOutcomes": ["string", "string"],
+        "sections": [
+            {
+                "title": "string",
+                "duration": "string",
+                "content": ["string", "string"], // Bullet points
+                "activity": "string", // Optional
+                "visualAid": { // Optional
+                    "type": "image" | "diagram" | "chart",
+                    "description": "string",
+                    "caption": "string"
+                }
+            }
+        ],
+        "homework": "string"
+      }
     `;
 
         if (requirements) {
@@ -69,7 +90,21 @@ export async function POST(req: Request) {
 
         const result = await model.generateContent(prompt);
         const text = result.response.text();
-        const lessonPlan = JSON.parse(text);
+
+        // Robust cleaning of markdown formatting
+        const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+
+        let lessonPlan;
+        try {
+            lessonPlan = JSON.parse(cleanedText);
+        } catch (e) {
+            console.error("Failed to parse Gemini response raw:", text);
+            console.error("Cleaned text:", cleanedText);
+            return NextResponse.json(
+                { error: "Invalid response format from AI" },
+                { status: 500 }
+            );
+        }
 
         return NextResponse.json(lessonPlan);
 
