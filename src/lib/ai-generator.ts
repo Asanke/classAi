@@ -51,7 +51,8 @@ export const generateAIQuiz = async (topic: string, difficulty: string, learning
         });
 
         if (!response.ok) {
-            throw new Error("Failed to generate quiz");
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || "Failed to generate quiz");
         }
 
         const data = await response.json();
@@ -77,7 +78,8 @@ export const generateAILessonPlan = async (topic: string, grade: string, require
         });
 
         if (!response.ok) {
-            throw new Error("Failed to generate lesson plan");
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || errorData.details || "Failed to generate lesson plan");
         }
 
         return await response.json();

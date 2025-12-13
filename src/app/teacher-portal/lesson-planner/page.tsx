@@ -104,9 +104,9 @@ export default function LessonPlanner() {
         try {
             const generatedPlan = await generateAILessonPlan(topic, grade, requirements);
             setPlan(generatedPlan);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to generate plan", error);
-            alert("Failed to generate lesson plan. The AI might be busy or the response was invalid. Please try again.");
+            alert(error.message || "Failed to generate lesson plan. Please try again.");
         } finally {
             setLoading(false);
         }
