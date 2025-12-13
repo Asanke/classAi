@@ -1,28 +1,25 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import { GOOGLE_API_KEY, GEMINI_MODEL } from "@/lib/gemini-config";
-
-const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+import { getVertexModel } from "@/lib/vertex-config";
 
 const schema = {
     description: "Quiz schema",
-    type: SchemaType.OBJECT,
+    type: "OBJECT", // SchemaType.OBJECT
     properties: {
-        title: { type: SchemaType.STRING, description: "Title of the quiz" },
+        title: { type: "STRING", description: "Title of the quiz" },
         questions: {
-            type: SchemaType.ARRAY,
+            type: "ARRAY",
             items: {
-                type: SchemaType.OBJECT,
+                type: "OBJECT",
                 properties: {
-                    id: { type: SchemaType.STRING, description: "Unique ID for the question" },
-                    question: { type: SchemaType.STRING, description: "The question text" },
+                    id: { type: "STRING", description: "Unique ID for the question" },
+                    question: { type: "STRING", description: "The question text" },
                     options: {
-                        type: SchemaType.ARRAY,
-                        items: { type: SchemaType.STRING },
+                        type: "ARRAY",
+                        items: { type: "STRING" },
                         description: "Array of 4 options"
                     },
-                    correctAnswer: { type: SchemaType.INTEGER, description: "Index of the correct answer (0-3)" },
-                    explanation: { type: SchemaType.STRING, description: "Explanation for the answer" }
+                    correctAnswer: { type: "INTEGER", description: "Index of the correct answer (0-3)" },
+                    explanation: { type: "STRING", description: "Explanation for the answer" }
                 },
                 required: ["id", "question", "options", "correctAnswer"]
             }
@@ -35,13 +32,10 @@ export async function POST(req: Request) {
     try {
         const { topic, difficulty, learningOutcomes } = await req.json();
 
-        const model = genAI.getGenerativeModel({
-            model: GEMINI_MODEL,
-            generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: schema as any,
-            },
-        });
+        const model = await getVertexModel();
+
+        // Note: generationConfig with responseSchema works best with Gemini 1.5 Pro/Flash
+        // but Vertex SDK usage might differ slightly. simpler to prompt for JSON.
 
         let prompt = `
       Create a ${difficulty} difficulty quiz about "${topic}".
@@ -60,24 +54,43 @@ export async function POST(req: Request) {
       `;
         }
 
+        prompt += `
+        Return a valid JSON object matching this schema:
+        {
+            "title": "Quiz Title",
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Question text",
+                    "options": ["Option A", "Option B", "Option C", "Option D"],
+                    "correctAnswer": 0,
+                    "explanation": "Why correct"
+                }
+            ]
+        }
+        Return ONLY the JSON.
+        `;
+
         const result = await model.generateContent(prompt);
-        const quizData = result.response.text();
+        const text = result.response.candidates?.[0].content?.parts?.[0].text || "{}";
 
-        // Parse to ensure it's valid JSON before sending
-        const parsedQuiz = JSON.parse(quizData);
+        // Robust cleaning
+        let cleanedText = text.trim();
+        cleanedText = cleanedText.replace(/^```json\s*/, "").replace(/^```\s*/, "").replace(/\s*```$/, "");
 
-        // Add metadata that the model might strictly miss or to ensure consistency
+        const parsedQuiz = JSON.parse(cleanedText);
+
         const finalQuiz = {
             ...parsedQuiz,
             topic,
             difficulty,
-            createdAt: new Date().toISOString(), // Send as string, convert in client
+            createdAt: new Date().toISOString(),
             id: Math.random().toString(36).substr(2, 9)
         };
 
         return NextResponse.json(finalQuiz);
     } catch (error) {
-        console.error("Gemini Generation Error:", error);
+        console.error("Vertex Grading Error:", error);
         return NextResponse.json(
             { error: "Failed to generate quiz" },
             { status: 500 }

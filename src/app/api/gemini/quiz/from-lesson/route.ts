@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { GOOGLE_API_KEY, GEMINI_MODEL } from "@/lib/gemini-config";
-
-const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+import { getVertexModel } from "@/lib/vertex-config";
 
 export async function POST(req: Request) {
     try {
         const { lessonPlan } = await req.json();
 
-        const model = genAI.getGenerativeModel({
-            model: GEMINI_MODEL,
-        });
+        const model = await getVertexModel();
 
         const prompt = `
       You are an expert teacher.
@@ -39,7 +34,7 @@ export async function POST(req: Request) {
     `;
 
         const result = await model.generateContent(prompt);
-        const text = result.response.text();
+        const text = result.response.candidates?.[0].content?.parts?.[0].text || "";
 
         // Robust cleaning
         let cleanedText = text.trim();

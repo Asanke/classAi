@@ -1,70 +1,13 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import { GOOGLE_API_KEY, GEMINI_MODEL } from "@/lib/gemini-config";
-
-const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-
-const schema = {
-    description: "Lesson Plan schema",
-    type: SchemaType.OBJECT,
-    properties: {
-        topic: { type: SchemaType.STRING },
-        grade: { type: SchemaType.STRING },
-        learningOutcomes: {
-            type: SchemaType.ARRAY,
-            items: { type: SchemaType.STRING }
-        },
-        sections: {
-            type: SchemaType.ARRAY,
-            items: {
-                type: SchemaType.OBJECT,
-                properties: {
-                    title: { type: SchemaType.STRING },
-                    duration: { type: SchemaType.STRING },
-                    content: {
-                        type: SchemaType.ARRAY,
-                        items: { type: SchemaType.STRING }
-                    },
-                    activity: { type: SchemaType.STRING },
-                    visualAid: {
-                        type: SchemaType.OBJECT,
-                        properties: {
-                            type: { type: SchemaType.STRING, enum: ["image", "diagram", "chart"] },
-                            description: { type: SchemaType.STRING, description: "Detailed prompt for generating this image" },
-                            caption: { type: SchemaType.STRING }
-                        },
-                        nullable: true
-                    }
-                },
-                required: ["title", "duration", "content"]
-            }
-        },
-        homework: { type: SchemaType.STRING }
-    },
-    required: ["topic", "grade", "learningOutcomes", "sections", "homework"]
-};
+import { getVertexModel } from "@/lib/vertex-config";
 
 export async function POST(req: Request) {
     try {
-        if (!GOOGLE_API_KEY) {
-            console.error("Gemini API Key is missing");
-            return NextResponse.json(
-                { error: "Configuration Error: API Key is missing" },
-                { status: 500 }
-            );
-        }
-
-        const body = await req.json();
-        const { topic, grade, requirements } = body;
+        const { topic, grade, requirements } = await req.json();
 
         console.log(`Generating lesson plan for: ${topic}, Grade: ${grade}`);
 
-        const model = genAI.getGenerativeModel({
-            model: GEMINI_MODEL,
-            generationConfig: {
-                // responseMimeType: "application/json", // Commented out to allow for potential text preamble/markdown
-            },
-        });
+        const model = await getVertexModel();
 
         let prompt = `
       Create a comprehensive lesson plan for Grade ${grade} students about "${topic}".
@@ -99,9 +42,10 @@ export async function POST(req: Request) {
         }
 
         const result = await model.generateContent(prompt);
-        const text = result.response.text();
+        // Vertex AI SDK specific: Access text from candidates
+        const text = result.response.candidates?.[0].content?.parts?.[0].text || "";
 
-        console.log("Raw Gemini Response:", text); // Debugging
+        console.log("Raw Vertex Response:", text); // Debugging
 
         // Robust cleaning of markdown formatting
         let cleanedText = text.trim();

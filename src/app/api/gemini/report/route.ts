@@ -1,19 +1,5 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { GOOGLE_API_KEY, GEMINI_MODEL } from "@/lib/gemini-config";
-import { db } from "@/lib/firebase"; // Note: This might be client SDK. 
-// Ideally we use firebase-admin for server routes, but often client SDK works in Next.js API routes if init is correct.
-// However, to be safe and avoid "window is not defined" issues if firebase.ts relies on browser,
-// we might mock the data fetching or ensure firebase.ts is universal.
-// For this specific tasks, I'll assume firebase.ts exports a valid db instance for Node environment 
-// (or uses firebase-admin which is better). 
-// Given the existing project structure, I will attempt to use the existing `getDocument` / `getDocs` if possible, 
-// OR simpler: receive the attempts data from the client (Client fetches data, Server generates report).
-// Sending data to server is safer for the API Key.
-
-// REVISED STRATEGY: Client fetches Firestore data (Memory), sends to Server. Server uses Gemini (Intelligence).
-
-const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+import { getVertexModel } from "@/lib/vertex-config";
 
 export async function POST(req: Request) {
     try {
@@ -27,7 +13,8 @@ export async function POST(req: Request) {
             `- Question: ${a.question}\n  Score: ${a.grading.score}/5\n  Feedback: ${a.grading.feedback}`
         ).join("\n\n");
 
-        const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+        const model = await getVertexModel();
+
         const prompt = `
         You are a gentle, constructive teacher reporting to a parent.
         Student: ${studentName || "The Student"}
@@ -41,7 +28,7 @@ export async function POST(req: Request) {
     `;
 
         const result = await model.generateContent(prompt);
-        const report = result.response.text();
+        const report = result.response.candidates?.[0].content?.parts?.[0].text || "No report generated.";
 
         return NextResponse.json({ report });
     } catch (error) {

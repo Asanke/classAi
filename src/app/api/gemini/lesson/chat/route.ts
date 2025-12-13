@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { GOOGLE_API_KEY, GEMINI_MODEL } from "@/lib/gemini-config";
-
-const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+import { getVertexModel } from "@/lib/vertex-config";
 
 export async function POST(req: Request) {
     try {
         const { currentPlan, prompt: userPrompt, image } = await req.json();
 
-        const model = genAI.getGenerativeModel({
-            model: GEMINI_MODEL,
-        });
+        const model = await getVertexModel();
 
         let promptText = `
       You are an expert curriculum developer. 
@@ -41,8 +36,10 @@ export async function POST(req: Request) {
             });
         }
 
-        const result = await model.generateContent(parts);
-        const text = result.response.text();
+        const result = await model.generateContent({
+            contents: [{ role: 'user', parts: parts }]
+        });
+        const text = result.response.candidates?.[0].content?.parts?.[0].text || "";
 
         // Robust cleaning
         let cleanedText = text.trim();

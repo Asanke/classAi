@@ -1,34 +1,13 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import { GOOGLE_API_KEY, GEMINI_MODEL } from "@/lib/gemini-config";
-
-const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-
-const schema = {
-    description: "Grading result schema",
-    type: SchemaType.OBJECT,
-    properties: {
-        score: { type: SchemaType.NUMBER, description: "Score awarded (e.g. 0-5)" },
-        maxScore: { type: SchemaType.NUMBER, description: "Maximum possible score" },
-        reason: { type: SchemaType.STRING, description: "Detailed explanation for the score" },
-        feedback: { type: SchemaType.STRING, description: "Constructive feedback for the student" }
-    },
-    required: ["score", "maxScore", "reason", "feedback"]
-};
+import { getVertexModel } from "@/lib/vertex-config";
 
 export async function POST(req: Request) {
     try {
         const { imageBase64, question, correctAnswer, rubric, maxScore = 5 } = await req.json();
 
-        const model = genAI.getGenerativeModel({
-            model: GEMINI_MODEL,
-            generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: schema as any,
-            },
-        });
+        const model = await getVertexModel();
 
-        // Clean base64 string if it contains metadata
+        // Clean base64 string
         const cleanBase64 = imageBase64.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, "");
 
         const prompt = `
@@ -41,23 +20,41 @@ export async function POST(req: Request) {
 
       Look at the image provided which contains the student's handwritten or typed answer.
       Grade it fairly. Return the score, reason, and constructive feedback.
+      
+      Return as JSON:
+      {
+        "score": number,
+        "maxScore": number,
+        "reason": "string",
+        "feedback": "string"
+      }
     `;
 
-        const result = await model.generateContent([
-            prompt,
-            {
-                inlineData: {
-                    data: cleanBase64,
-                    mimeType: "image/jpeg", // Assuming JPEG for simplicity, can make dynamic if needed
-                },
-            },
-        ]);
+        const result = await model.generateContent({
+            contents: [{
+                role: 'user',
+                parts: [
+                    { text: prompt },
+                    {
+                        inlineData: {
+                            data: cleanBase64,
+                            mimeType: "image/jpeg"
+                        }
+                    }
+                ]
+            }]
+        });
 
-        const gradingData = JSON.parse(result.response.text());
+        const text = result.response.candidates?.[0].content?.parts?.[0].text || "{}";
+
+        let cleanedText = text.trim();
+        cleanedText = cleanedText.replace(/^```json\s*/, "").replace(/^```\s*/, "").replace(/\s*```$/, "");
+
+        const gradingData = JSON.parse(cleanedText);
 
         return NextResponse.json(gradingData);
     } catch (error) {
-        console.error("Gemini Grading Error:", error);
+        console.error("Vertex Grading Error:", error);
         return NextResponse.json(
             { error: "Failed to grade answer" },
             { status: 500 }
