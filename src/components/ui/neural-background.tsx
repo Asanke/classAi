@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTheme } from "next-themes";
 
 export function NeuralBackground() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const { theme, systemTheme } = useTheme();
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -15,10 +17,19 @@ export function NeuralBackground() {
         let width = canvas.width = window.innerWidth;
         let height = canvas.height = window.innerHeight;
 
+        // Determine current theme
+        const currentTheme = theme === "system" ? systemTheme : theme;
+        const isDark = currentTheme === "dark";
+
+        // Colors based on theme
+        const bgColor = isDark ? "rgb(10, 15, 30)" : "rgb(240, 244, 248)";
+        const particleColor = isDark ? "rgba(45, 212, 191, 0.6)" : "rgba(30, 64, 175, 0.6)"; // Teal (Dark) vs Blue (Light)
+        const lineColor = isDark ? "rgba(45, 212, 191," : "rgba(30, 64, 175,";
+
         const particles: Particle[] = [];
-        const particleCount = 60; // Adjust for density
-        const connectionDistance = 150;
-        const mouseDistance = 200;
+        const particleCount = 80;
+        const connectionDistance = 180;
+        const mouseDistance = 250;
 
         let mouse = { x: 0, y: 0 };
 
@@ -32,8 +43,8 @@ export function NeuralBackground() {
             constructor() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
                 this.size = Math.random() * 2 + 1;
             }
 
@@ -41,11 +52,9 @@ export function NeuralBackground() {
                 this.x += this.vx;
                 this.y += this.vy;
 
-                // Bounce off edges
                 if (this.x < 0 || this.x > width) this.vx *= -1;
                 if (this.y < 0 || this.y > height) this.vy *= -1;
 
-                // Mouse interaction
                 const dx = mouse.x - this.x;
                 const dy = mouse.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
@@ -56,14 +65,14 @@ export function NeuralBackground() {
                     const force = (mouseDistance - distance) / mouseDistance;
                     const directionX = forceDirectionX * force * 0.5;
                     const directionY = forceDirectionY * force * 0.5;
-                    this.vx += directionX;
-                    this.vy += directionY;
+                    this.vx -= directionX * 0.05;
+                    this.vy -= directionY * 0.05;
                 }
             }
 
             draw() {
                 if (!ctx) return;
-                ctx.fillStyle = "rgba(100, 200, 255, 0.5)";
+                ctx.fillStyle = particleColor;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -78,13 +87,15 @@ export function NeuralBackground() {
         };
 
         const animate = () => {
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = bgColor;
+
+            // Clear with Fill Rect
+            ctx.fillRect(0, 0, width, height);
 
             particles.forEach((particle, index) => {
                 particle.update();
                 particle.draw();
 
-                // Connect particles
                 for (let j = index; j < particles.length; j++) {
                     const dx = particles[j].x - particle.x;
                     const dy = particles[j].y - particle.y;
@@ -93,7 +104,7 @@ export function NeuralBackground() {
                     if (distance < connectionDistance) {
                         ctx.beginPath();
                         const opacity = 1 - distance / connectionDistance;
-                        ctx.strokeStyle = `rgba(100, 200, 255, ${opacity * 0.2})`;
+                        ctx.strokeStyle = `${lineColor} ${opacity * 0.3})`;
                         ctx.lineWidth = 1;
                         ctx.moveTo(particle.x, particle.y);
                         ctx.lineTo(particles[j].x, particles[j].y);
@@ -120,18 +131,19 @@ export function NeuralBackground() {
         window.addEventListener("mousemove", handleMouseMove);
 
         init();
-        animate();
+        const animId = requestAnimationFrame(animate);
 
         return () => {
             window.removeEventListener("resize", handleResize);
             window.removeEventListener("mousemove", handleMouseMove);
+            cancelAnimationFrame(animId);
         };
-    }, []);
+    }, [theme, systemTheme]); // Re-run effect when theme changes
 
     return (
         <canvas
             ref={canvasRef}
-            className="fixed top-0 left-0 w-full h-full -z-20 pointer-events-none bg-background"
+            className="fixed top-0 left-0 w-full h-full -z-20 pointer-events-none transition-colors duration-500"
         />
     );
 }
