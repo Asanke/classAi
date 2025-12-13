@@ -51,8 +51,7 @@ export async function POST(req: Request) {
         const model = genAI.getGenerativeModel({
             model: GEMINI_MODEL,
             generationConfig: {
-                responseMimeType: "application/json",
-                // responseSchema: schema as any, // Schema validation can sometimes be too strict or fail with markdown
+                // responseMimeType: "application/json", // Commented out to allow for potential text preamble/markdown
             },
         });
 
@@ -91,8 +90,12 @@ export async function POST(req: Request) {
         const result = await model.generateContent(prompt);
         const text = result.response.text();
 
+        console.log("Raw Gemini Response:", text); // Debugging
+
         // Robust cleaning of markdown formatting
-        const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        let cleanedText = text.trim();
+        // Remove ```json and ``` wrapping
+        cleanedText = cleanedText.replace(/^```json\s*/, "").replace(/^```\s*/, "").replace(/\s*```$/, "");
 
         let lessonPlan;
         try {
@@ -101,7 +104,7 @@ export async function POST(req: Request) {
             console.error("Failed to parse Gemini response raw:", text);
             console.error("Cleaned text:", cleanedText);
             return NextResponse.json(
-                { error: "Invalid response format from AI" },
+                { error: "Invalid response format from AI", details: text },
                 { status: 500 }
             );
         }

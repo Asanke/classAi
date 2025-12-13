@@ -20,6 +20,11 @@ export default function QuizGeneratorPage() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [quiz, setQuiz] = useState<Quiz | null>(null);
 
+    // Assignment State
+    const [pointsPerQuestion, setPointsPerQuestion] = useState(1);
+    const [assignmentType, setAssignmentType] = useState<"broadcast" | "individual">("broadcast");
+    const [studentIds, setStudentIds] = useState("");
+
     const handleGenerate = async () => {
         if (!topic) return;
         setIsGenerating(true);
@@ -38,7 +43,9 @@ export default function QuizGeneratorPage() {
         try {
             await addDocument("quizzes", {
                 ...quiz,
-                assignedTo: ["all"], // Simplifying for MVP
+                assignedTo: assignmentType === "broadcast" ? ["all"] : studentIds.split(",").map(id => id.trim()),
+                pointsPerQuestion,
+                totalMarks: pointsPerQuestion * quiz.questions.length,
                 status: "active"
             });
             alert("Quiz saved successfully!");
@@ -130,6 +137,50 @@ export default function QuizGeneratorPage() {
                             Save to Library
                         </Button>
                     </div>
+
+
+
+                    <GlassCard className="p-6 bg-b2u-blue/5 border-b2u-blue/20">
+                        <h3 className="font-semibold mb-4">Quiz Settings & Assignment</h3>
+                        <div className="grid gap-6 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Points per Question</label>
+                                <Input
+                                    type="number"
+                                    min={1}
+                                    value={pointsPerQuestion}
+                                    onChange={(e) => setPointsPerQuestion(Number(e.target.value))}
+                                />
+                                <p className="text-xs text-muted-foreground">Total Marks: {pointsPerQuestion * quiz.questions.length}</p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Assignment Method</label>
+                                    <Select value={assignmentType} onValueChange={(v: any) => setAssignmentType(v)}>
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="broadcast">Broadcast to Class</SelectItem>
+                                            <SelectItem value="individual">Assign to Student IDs</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {assignmentType === "individual" && (
+                                    <div className="space-y-2 faide-in">
+                                        <label className="text-sm font-medium">Student IDs (Comma separated)</label>
+                                        <Input
+                                            placeholder="e.g. STU001, STU002"
+                                            value={studentIds}
+                                            onChange={(e) => setStudentIds(e.target.value)}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </GlassCard>
 
                     <div className="grid gap-4">
                         {quiz.questions.map((q, i) => (
