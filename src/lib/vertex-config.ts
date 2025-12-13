@@ -10,15 +10,25 @@ let googleAuthOptions;
 if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
     try {
         const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-        // CRITICAL FIX: Handle escaped newlines in private_key (common Vercel issue)
+        // Handle escaped newlines in private_key
         if (credentials.private_key) {
             credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
         }
         googleAuthOptions = { credentials };
-        console.log("Vertex AI: Using Service Account Credentials from Env Var");
     } catch (e) {
         console.error("Vertex AI: Failed to parse GOOGLE_SERVICE_ACCOUNT_JSON", e);
     }
+}
+
+// Fallback: Individual env vars (Standard Vercel Pattern)
+if (!googleAuthOptions && process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
+    googleAuthOptions = {
+        credentials: {
+            client_email: process.env.GOOGLE_CLIENT_EMAIL,
+            private_key: privateKey,
+        }
+    };
 }
 
 const vertex_ai = new VertexAI({
