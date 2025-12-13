@@ -46,7 +46,18 @@ const schema = {
 
 export async function POST(req: Request) {
     try {
-        const { topic, grade, requirements } = await req.json();
+        if (!GOOGLE_API_KEY) {
+            console.error("Gemini API Key is missing");
+            return NextResponse.json(
+                { error: "Configuration Error: API Key is missing" },
+                { status: 500 }
+            );
+        }
+
+        const body = await req.json();
+        const { topic, grade, requirements } = body;
+
+        console.log(`Generating lesson plan for: ${topic}, Grade: ${grade}`);
 
         const model = genAI.getGenerativeModel({
             model: GEMINI_MODEL,
@@ -111,10 +122,10 @@ export async function POST(req: Request) {
 
         return NextResponse.json(lessonPlan);
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Lesson Plan Generation Error:", error);
         return NextResponse.json(
-            { error: "Failed to generate lesson plan" },
+            { error: `Failed to generate lesson plan: ${error.message || "Unknown error"}` },
             { status: 500 }
         );
     }
