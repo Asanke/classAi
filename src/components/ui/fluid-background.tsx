@@ -10,7 +10,6 @@ export function FluidBackground() {
         if (canvasRef.current) {
             const fluid = new WebGLFluidEnhanced(canvasRef.current);
             fluid.setConfig({
-                event: "move", // "move" | "click" | "hover" | "always"
                 startSplats: 8,
                 densityDissipation: 0.98,
                 velocityDissipation: 0.99,
