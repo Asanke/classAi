@@ -45,7 +45,7 @@ export async function POST(req: Request) {
             }]
         });
 
-        const text = result.response.candidates?.[0].content?.parts?.[0].text || "{}";
+        const text = result.response.text();
 
         let cleanedText = text.trim();
         cleanedText = cleanedText.replace(/^```json\s*/, "").replace(/^```\s*/, "").replace(/\s*```$/, "");

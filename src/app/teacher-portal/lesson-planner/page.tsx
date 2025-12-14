@@ -149,6 +149,7 @@ export default function LessonPlanner() {
                             placeholder="Include a practical experiment, mention specific history..."
                             value={requirements}
                             onChange={(e) => setRequirements(e.target.value)}
+                            suppressHydrationWarning
                         />
                     </div>
 

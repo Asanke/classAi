@@ -39,7 +39,7 @@ export async function POST(req: Request) {
         const result = await model.generateContent({
             contents: [{ role: 'user', parts: parts }]
         });
-        const text = result.response.candidates?.[0].content?.parts?.[0].text || "";
+        const text = result.response.text();
 
         // Robust cleaning
         let cleanedText = text.trim();

@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     `;
 
         const result = await model.generateContent(prompt);
-        const report = result.response.candidates?.[0].content?.parts?.[0].text || "No report generated.";
+        const report = result.response.text();
 
         return NextResponse.json({ report });
     } catch (error) {

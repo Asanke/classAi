@@ -1,44 +1,17 @@
-import { VertexAI } from '@google-cloud/vertexai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Initialize Vertex with your Cloud project and location
-// These should be set in your environment variables
-const project = process.env.GOOGLE_PROJECT_ID;
-const location = process.env.GOOGLE_LOCATION || 'us-central1';
+// Initialize Google AI Client
+// We use the API Key from environment variables
+const apiKey = process.env.GOOGLE_API_KEY;
 
-// Vercel-friendly: Accept JSON string directly instead of file path
-let googleAuthOptions;
-if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
-    try {
-        const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-        // Handle escaped newlines in private_key
-        if (credentials.private_key) {
-            credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
-        }
-        googleAuthOptions = { credentials };
-    } catch (e) {
-        console.error("Vertex AI: Failed to parse GOOGLE_SERVICE_ACCOUNT_JSON", e);
-    }
+if (!apiKey) {
+    console.warn("⚠️ GOOGLE_API_KEY is missing from environment variables");
 }
 
-// Fallback: Individual env vars (Standard Vercel Pattern)
-if (!googleAuthOptions && process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
-    googleAuthOptions = {
-        credentials: {
-            client_email: process.env.GOOGLE_CLIENT_EMAIL,
-            private_key: privateKey,
-        }
-    };
-}
+const genAI = new GoogleGenerativeAI(apiKey || "");
 
-const vertex_ai = new VertexAI({
-    project: project || 'YOUR_PROJECT_ID',
-    location: location,
-    googleAuthOptions
-});
-
-export function getVertexModel(modelName: string = 'gemini-1.5-pro') {
-    return vertex_ai.getGenerativeModel({
-        model: modelName,
-    });
+export function getVertexModel(modelName: string = 'gemini-1.5-flash') {
+    // Return the generative model instance
+    // Note: The interface is slightly different, but we'll adapt usage in the API routes
+    return genAI.getGenerativeModel({ model: modelName });
 }

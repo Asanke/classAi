@@ -162,6 +162,58 @@ export default function DashboardPage() {
                     </CardContent>
                 </GlassCard>
             </div>
+
+            {/* Teacher Payroll / Payments - NEW SECTION */}
+            <div className="grid gap-4">
+                <GlassCard>
+                    <CardHeader>
+                        <CardTitle>Teacher Payroll & Commission</CardTitle>
+                        <CardDescription>Manage monthly payments and commission shares</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="border-b-white/10 hover:bg-transparent">
+                                    <TableHead>Teacher</TableHead>
+                                    <TableHead>Class</TableHead>
+                                    <TableHead>Commission Rate</TableHead>
+                                    <TableHead>Total Revenue</TableHead>
+                                    <TableHead>Due Amount</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow className="border-b-white/10 hover:bg-white/5">
+                                    <TableCell className="font-medium">Mr. Perera</TableCell>
+                                    <TableCell>Physics (A/L)</TableCell>
+                                    <TableCell>70%</TableCell>
+                                    <TableCell>LKR 150,000</TableCell>
+                                    <TableCell className="text-emerald-500 font-bold">LKR 105,000</TableCell>
+                                    <TableCell><Badge variant="outline" className="text-amber-500 border-amber-500">Pending</Badge></TableCell>
+                                    <TableCell className="text-right">
+                                        <button className="text-xs bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded hover:bg-emerald-500/20 transition-colors" onClick={() => alert("Payment Processed")}>
+                                            Approve Payout
+                                        </button>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow className="border-b-white/10 hover:bg-white/5">
+                                    <TableCell className="font-medium">Ms. Silva</TableCell>
+                                    <TableCell>Chemistry (O/L)</TableCell>
+                                    <TableCell>60%</TableCell>
+                                    <TableCell>LKR 80,000</TableCell>
+                                    <TableCell className="text-emerald-500 font-bold">LKR 48,000</TableCell>
+                                    <TableCell><Badge variant="outline" className="text-emerald-500 border-emerald-500">Paid</Badge></TableCell>
+                                    <TableCell className="text-right">
+                                        <span className="text-xs text-muted-foreground">Completed</span>
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </GlassCard>
+            </div>
         </div>
+
     );
 }

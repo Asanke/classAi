@@ -42,8 +42,8 @@ export async function POST(req: Request) {
         }
 
         const result = await model.generateContent(prompt);
-        // Vertex AI SDK specific: Access text from candidates
-        const text = result.response.candidates?.[0].content?.parts?.[0].text || "";
+        // Google Generative AI SDK: Access text via helper
+        const text = result.response.text();
 
         console.log("Raw Vertex Response:", text); // Debugging
 

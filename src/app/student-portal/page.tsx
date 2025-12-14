@@ -1,9 +1,10 @@
 "use client";
 
 import { GlassCard } from "@/components/ui/glass-card";
-import { BookOpen, CalendarCheck, Clock, FileText, TrendingUp, Trophy } from "lucide-react";
+import { BookOpen, CalendarCheck, Clock, FileText, TrendingUp, Trophy, CreditCard, MessageCircleQuestion } from "lucide-react";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export default function StudentPortalPage() {
@@ -102,29 +103,71 @@ export default function StudentPortalPage() {
 
                 <GlassCard className="col-span-1">
                     <CardHeader>
-                        <CardTitle>Recent Activity</CardTitle>
+                        <CardTitle>Upcoming Classes</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-4">
-                            <div className="flex items-center">
-                                <FileText className="h-9 w-9 text-b2u-cyan bg-b2u-cyan/10 p-2 rounded-full mr-4" />
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium leading-none">Submitted History Essay</p>
-                                    <p className="text-xs text-muted-foreground">2 hours ago</p>
-                                </div>
-                                <div className="ml-auto font-medium text-green-500 text-sm">Graded</div>
-                            </div>
-                            <div className="flex items-center">
-                                <TrendingUp className="h-9 w-9 text-b2u-teal bg-b2u-teal/10 p-2 rounded-full mr-4" />
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium leading-none">Improved Science Score</p>
-                                    <p className="text-xs text-muted-foreground">Yesterday</p>
-                                </div>
-                                <div className="ml-auto font-medium text-b2u-teal text-sm">+5%</div>
-                            </div>
-                        </div>
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="border-b-white/10 hover:bg-transparent">
+                                    <TableHead>Subject</TableHead>
+                                    <TableHead>Time</TableHead>
+                                    <TableHead className="text-right">Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow className="border-b-white/10 hover:bg-white/5">
+                                    <TableCell className="font-medium">Mathematics</TableCell>
+                                    <TableCell>Today, 4:00 PM</TableCell>
+                                    <TableCell className="text-right">
+                                        <Badge className="bg-b2u-blue hover:bg-b2u-blue/80 cursor-pointer">Join Live</Badge>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow className="border-b-white/10 hover:bg-white/5">
+                                    <TableCell className="font-medium">Science</TableCell>
+                                    <TableCell>Tomorrow, 2:00 PM</TableCell>
+                                    <TableCell className="text-right">
+                                        <Badge variant="secondary">View Materials</Badge>
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
                     </CardContent>
                 </GlassCard>
+
+                {/* Payments & Actions */}
+                <div className="space-y-6">
+                    <GlassCard>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-md font-bold">Payments</CardTitle>
+                            <Badge variant="destructive">Due: 5,000 LKR</Badge>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <p className="text-sm text-muted-foreground">Monthly tuition for Science & Math is due.</p>
+                            <Button
+                                className="w-full bg-gradient-to-r from-b2u-blue to-b2u-purple hover:opacity-90 transition-opacity"
+                                onClick={() => alert("Payment Gateway / QR Upload Logic will go here.")}
+                            >
+                                <CreditCard className="mr-2 h-4 w-4" /> Pay Now
+                            </Button>
+                        </CardContent>
+                    </GlassCard>
+
+                    <GlassCard>
+                        <CardHeader>
+                            <CardTitle>Quick Actions</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-2 gap-4">
+                            <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => alert("Navigate to Q&A")}>
+                                <MessageCircleQuestion className="h-6 w-6 text-b2u-cyan" />
+                                <span>Ask Question</span>
+                            </Button>
+                            <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => alert("Navigate to Study Plan")}>
+                                <BookOpen className="h-6 w-6 text-b2u-teal" />
+                                <span>Study Plan</span>
+                            </Button>
+                        </CardContent>
+                    </GlassCard>
+                </div>
             </div>
         </div>
     );

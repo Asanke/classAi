@@ -35,29 +35,33 @@ export default function TeacherPortal() {
                     </GlassCard>
                 </Link>
 
-                <GlassCard hoverEffect className="h-full group cursor-pointer border-b2u-blue/20">
-                    <div className="p-6 space-y-4">
-                        <div className="h-12 w-12 rounded-xl bg-b2u-blue/20 flex items-center justify-center text-b2u-blue group-hover:scale-110 transition-transform">
-                            <Users size={28} />
+                <Link href="/teacher-portal/progress">
+                    <GlassCard hoverEffect className="h-full group cursor-pointer border-b2u-blue/20">
+                        <div className="p-6 space-y-4">
+                            <div className="h-12 w-12 rounded-xl bg-b2u-blue/20 flex items-center justify-center text-b2u-blue group-hover:scale-110 transition-transform">
+                                <Users size={28} />
+                            </div>
+                            <h3 className="text-2xl font-bold">Student Analytics</h3>
+                            <p className="text-muted-foreground">
+                                View class performance, identify weak spots, and track learning outcomes.
+                            </p>
                         </div>
-                        <h3 className="text-2xl font-bold">Student Analytics</h3>
-                        <p className="text-muted-foreground">
-                            View class performance, identify weak spots, and track learning outcomes.
-                        </p>
-                    </div>
-                </GlassCard>
+                    </GlassCard>
+                </Link>
 
-                <GlassCard hoverEffect className="h-full group cursor-pointer border-b2u-teal/20">
-                    <div className="p-6 space-y-4">
-                        <div className="h-12 w-12 rounded-xl bg-b2u-teal/20 flex items-center justify-center text-b2u-teal group-hover:scale-110 transition-transform">
-                            <FileText size={28} />
+                <Link href="/teacher-portal/quiz-generator">
+                    <GlassCard hoverEffect className="h-full group cursor-pointer border-b2u-teal/20">
+                        <div className="p-6 space-y-4">
+                            <div className="h-12 w-12 rounded-xl bg-b2u-teal/20 flex items-center justify-center text-b2u-teal group-hover:scale-110 transition-transform">
+                                <FileText size={28} />
+                            </div>
+                            <h3 className="text-2xl font-bold">Homework & Quizzes</h3>
+                            <p className="text-muted-foreground">
+                                Create AI-generated quizzes and auto-grade student submissions.
+                            </p>
                         </div>
-                        <h3 className="text-2xl font-bold">Homework & Quizzes</h3>
-                        <p className="text-muted-foreground">
-                            Create AI-generated quizzes and auto-grade student submissions.
-                        </p>
-                    </div>
-                </GlassCard>
+                    </GlassCard>
+                </Link>
             </div>
         </div>
     );

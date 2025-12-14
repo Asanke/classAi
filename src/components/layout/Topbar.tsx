@@ -28,6 +28,7 @@ export function Topbar() {
                         type="search"
                         placeholder="Search students, classes, or invoices..."
                         className="pl-8 bg-white/5 border-white/10 focus-visible:ring-b2u-cyan/50"
+                        suppressHydrationWarning
                     />
                 </div>
             </div>

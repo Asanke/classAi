@@ -72,7 +72,7 @@ export async function POST(req: Request) {
         `;
 
         const result = await model.generateContent(prompt);
-        const text = result.response.candidates?.[0].content?.parts?.[0].text || "{}";
+        const text = result.response.text();
 
         // Robust cleaning
         let cleanedText = text.trim();
