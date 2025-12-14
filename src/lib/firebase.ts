@@ -5,7 +5,7 @@ import { getFunctions } from "firebase/functions";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDGbO0LTl5FTV99U4N8Qkdq-jKAwTqdWbo",
+    apiKey: "AIzaSyBM3G6VWgrtoHcgV1DFSFJVKBIf0uRlSQQ",
     authDomain: "class-2d5f5.firebaseapp.com",
     projectId: "class-2d5f5",
     storageBucket: "class-2d5f5.firebasestorage.app",
